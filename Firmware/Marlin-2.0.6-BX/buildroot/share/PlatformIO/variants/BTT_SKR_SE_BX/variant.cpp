@@ -68,6 +68,7 @@ const PinName digitalPin[] = {
   PC_7,  // D59
   PC_8,  // D60
   PC_9,  // D61
+  PA_2,  // D110 / A2
   PA_8,  // D62
   PA_9,  // D63
   PA_10, // D64
@@ -116,7 +117,6 @@ const PinName digitalPin[] = {
   PI_7,  // D107
   PA_0,  // D108 / A0
   PA_1,  // D109 / A1
-  PA_2,  // D110 / A2
   PA_3,  // D111 / A3
   PA_4,  // D112 / A4
   PA_5,  // D113 / A5
@@ -254,6 +254,57 @@ void SystemClockStartupInit() {
   RCC->D2CCIP2R |= 3 << 20;     // HSI48_ck clock is selected as kernel clock
 }
 
+
+uint8_t MPU_Convert_Bytes_To_POT(uint32_t nbytes)
+{
+	uint8_t count=0;
+	while(nbytes!=1)
+	{
+		nbytes>>=1;
+		count++;
+	}
+	return count;
+}
+
+uint8_t MPU_Set_Protection(uint32_t baseaddr,uint32_t size,uint32_t rnum,uint8_t ap,uint8_t sen,uint8_t cen,uint8_t ben)
+{
+	uint32_t tempreg=0;
+	uint8_t rnr=0;
+	if((size%32)||size==0)return 1;
+	rnr=MPU_Convert_Bytes_To_POT(size)-1;
+	SCB->SHCSR&=~(1<<16);	        //disable MemManage
+	MPU->CTRL&=~(1<<0);		        //disable MPU
+	MPU->RNR=rnum;
+	MPU->RBAR=baseaddr;
+	tempreg|=0<<28;
+	tempreg|=((uint32_t)ap)<<24;
+	tempreg|=0<<19;
+	tempreg|=((uint32_t)sen)<<18;
+	tempreg|=((uint32_t)cen)<<17;
+	tempreg|=((uint32_t)ben)<<16;
+	tempreg|=0<<8;
+	tempreg|=rnr<<1;
+	tempreg|=1<<0;
+  MPU->RASR=tempreg;
+	MPU->CTRL=(1<<2)|(1<<0);      //enable PRIVDEFENA
+	SCB->SHCSR|=1<<16;		        //enable MemManage
+	return 0;
+}
+
+void MPU_Memory_Protection(void)
+{
+	MPU_Set_Protection(0x20000000,128*1024,1,MPU_REGION_FULL_ACCESS,0,1,1);       // protect DTCM 128k,  Sharing is prohibited, cache is allowed, and buffering is allowed
+
+	MPU_Set_Protection(0x24000000,512*1024,2,MPU_REGION_FULL_ACCESS,0,1,1);       // protect AXI SRAM,  Sharing is prohibited, cache is allowed, and buffering is allowed
+	MPU_Set_Protection(0x30000000,512*1024,3,MPU_REGION_FULL_ACCESS,0,1,1);       // protect SRAM1~SRAM3, Sharing is prohibited, cache is allowed, and buffering is allowed
+	MPU_Set_Protection(0x38000000,64*1024,4,MPU_REGION_FULL_ACCESS,0,1,1);        // protect SRAM4, Sharing is prohibited, cache is allowed, and buffering is allowed
+
+	MPU_Set_Protection(0x60000000,64*1024*1024,5,MPU_REGION_FULL_ACCESS,0,0,0);   // protect LCD FMC  64M, No sharing, no cache, no buffering
+	MPU_Set_Protection(0XC0000000,32*1024*1024,6,MPU_REGION_FULL_ACCESS,0,1,1);   // protect SDRAM  32M, Sharing is prohibited, cache is allowed, and buffering is allowed
+	MPU_Set_Protection(0X80000000,256*1024*1024,7,MPU_REGION_FULL_ACCESS,0,0,0);  // protect NAND FLASH 256M, No sharing, no cache, no buffering
+}
+
+
 /**
   * @brief  System Clock Configuration
   * @param  None
@@ -262,6 +313,8 @@ void SystemClockStartupInit() {
 WEAK void SystemClock_Config(void)
 {
   SystemClockStartupInit();
+
+  MPU_Memory_Protection();
 
   /* Update current SystemCoreClock value */
   SystemCoreClockUpdate();

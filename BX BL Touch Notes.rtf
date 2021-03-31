@@ -1,0 +1,82 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2578
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww28300\viewh17140\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Start Script Options\
+\
+If you run ABL through the touch screen, it will heat the bed to 50C and probe 25 points. If you save after this the probe points will be stored\
+\
+You can run commands from terminal to test and know what to expect\
+\
+M851 ; will report probe offsets. If you use the provided probe mount, the offsets are X-38.73 Y0 Z-3 \
+\
+G34 ; probe left-center than right-center back and forth until X axis is square within .02mm\
+\
+G29 ; preceded by G28 and probes 25 points\
+\
+\
+Filament Sensor \'97 If not used and runout triggers at start of print, send the command below\
+\
+From terminal \
+M412 S0\
+M500\
+\
+\
+\
+OPTION 1 \'97 probe every print\
+\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 ; Prusa Slicer tokens used \'97 make sure you edit for your slicer\
+\
+G90 ; use absolute coordinates\
+M83 ; extruder relative mode\
+M104 S[first_layer_temperature] ; set extruder temp\
+M140 S[first_layer_bed_temperature] ; set bed temp\
+M190 S[first_layer_bed_temperature] ; wait for bed temp\
+M109 S[first_layer_temperature] ; wait for extruder temp\
+G28 ; home all\
+\
+; new additions\
+G34\
+G29\
+\
+G1 Z2 F240\
+G1 X2 Y10 F3000\
+G1 Z0.28 F240\
+G92 E0\
+G1 Y190 E15 F1500 ; intro line\
+G1 X2.3 F5000\
+G92 E0\
+G1 Y10 E15 F1200 ; intro line\
+G92 E0\
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+\cf0 \
+\
+OPTION 2 \'97 probe before through touch screen and use stored mesh\
+\
+; Prusa Slicer tokens used \'97 make sure you edit for your slicer\
+\
+G90 ; use absolute coordinates\
+M83 ; extruder relative mode\
+M104 S[first_layer_temperature] ; set extruder temp\
+M140 S[first_layer_bed_temperature] ; set bed temp\
+M190 S[first_layer_bed_temperature] ; wait for bed temp\
+M109 S[first_layer_temperature] ; wait for extruder temp\
+G28 ; home all\
+\
+; new additions\
+G34 ; auto Z align\
+M420SZ0 ; recall mesh / set Z fade height to 0\
+\
+G1 Z2 F240\
+G1 X2 Y10 F3000\
+G1 Z0.28 F240\
+G92 E0\
+G1 Y190 E15 F1500 ; intro line\
+G1 X2.3 F5000\
+G92 E0\
+G1 Y10 E15 F1200 ; intro line\
+G92 E0}

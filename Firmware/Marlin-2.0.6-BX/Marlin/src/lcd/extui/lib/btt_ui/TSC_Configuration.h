@@ -187,8 +187,8 @@
 
 /**
  * Fan control
- * 
- * Fan type Options: 
+ *
+ * Fan type Options:
  *               0: FAN_TYPE_F       - default cooling fan speed (Check Marlin GCode M106)
  *               1: FAN_TYPE_CTRL_S  - Controller fan speed for stepper or hot bed ON (Check Marlin GCode M710)
  *               2: FAN_TYPE_CTRL_I  - Controller fan idle speed  (Check Marlin gcode - M710)
@@ -339,7 +339,9 @@
 
 // Smart filament runout detection
 // For use with an encoder disc that toggles runout pin as filament moves
-#define FILAMENT_RUNOUT_DISTANCE_MM 7
+#ifndef FILAMENT_RUNOUT_DISTANCE_MM
+  #define FILAMENT_RUNOUT_DISTANCE_MM 7
+#endif
 
 // Enable alternative Move Menu Buttons Layout matching the direction of actual printer axis.
 // update the icons from alternate icon folder
